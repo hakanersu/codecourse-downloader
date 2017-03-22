@@ -35,8 +35,7 @@ class Core
         $remotes = $this->remote->series($this->output);
         $checkLessons = [];
         echo PHP_EOL;
-        $this->output->writeln("<info>Collecting downloading information, if you start it first time it can be take time.</info>");
-
+        $this->output->writeln("<info>Calculating downloading information.</info>");
         foreach ($remotes as $lesson => $count) {
             $locale = $files->lessons($lesson);
             $this->remote->createFolderIfNotExists($lesson, $files);

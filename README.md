@@ -4,6 +4,7 @@ Download codecourse.com videos.
 ## Description
 Inspired from iamfreee/laracasts-downloader. Download or update your local catalogue with codecourse.com series.
 
+If you dont want to save your username and password in configuration file just remove username and password settings from configuration file. It will ask your username and password after you run downloader.
 #### An account with an active subscription is necessary!
 
 ## Requirements
