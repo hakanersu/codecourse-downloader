@@ -1,6 +1,6 @@
 # Codecourse Downloader
 Download codecourse.com videos.
-
+![Screenshot](screenshot.png)
 ## Description
 Inspired from iamfreee/laracasts-downloader. Download or update your local catalogue with codecourse.com series.
 
