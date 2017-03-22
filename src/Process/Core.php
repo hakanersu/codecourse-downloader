@@ -44,7 +44,7 @@ class Core
                 echo PHP_EOL;
                 $this->output->writeln("<info>Downloading series: {$lesson}</info>");
                 $progress = new ProgressBar($this->output, $remoteLessons->count());
-                $progress->setFormat('very_verbose');
+                $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
                 $progress->start();
                 foreach ($remoteLessons as $item) {
                     if (!$files->file->has($lesson.'/'.$item['slug'])) {
