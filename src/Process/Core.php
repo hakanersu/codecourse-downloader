@@ -39,7 +39,7 @@ class Core
         foreach ($remotes as $lesson => $count) {
             $locale = $files->lessons($lesson);
             $this->remote->createFolderIfNotExists($lesson, $files);
-            if ($locale->count() <= $count) {
+            
                 $remoteLessons = $this->remote->getLessons($lesson);
                 echo PHP_EOL;
                 $this->output->writeln("<info>Downloading series: {$lesson}</info>");
@@ -53,7 +53,7 @@ class Core
                     $progress->advance();
                 }
                 $progress->finish();
-            }
+            
         }
     }
 }
