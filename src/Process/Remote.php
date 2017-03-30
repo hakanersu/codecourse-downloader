@@ -26,6 +26,7 @@ class Remote
 
     public function login($username, $password)
     {
+
         $response = $this->client->request('GET', getenv('LOGIN_PATH'), [
             'cookies' => $this->cookie,
             'verify' => false
@@ -45,10 +46,15 @@ class Remote
         ]);
 
         $html = (string) $response->getBody();
-
+        
         if(strpos($html, "Couldn't sign you in with those details.") !== FALSE) {
             return false;
         }
+
+        if(strpos($html, "Couldn&#039;t sign you in with those details.") !== FALSE) {
+            return false;
+        }
+
         if(strpos($html, "Could not find that account") !== FALSE) {
             return false;
         }
