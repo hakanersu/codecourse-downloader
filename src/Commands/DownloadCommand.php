@@ -15,7 +15,7 @@ class DownloadCommand extends Command
     {
         $this->setName('download')
             ->setDescription('Download all lessons.')
-            ->addArgument('force', InputArgument::OPTIONAL);
+            ->addArgument('series', InputArgument::OPTIONAL);
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -41,8 +41,9 @@ class DownloadCommand extends Command
             $username = getenv('CCUSERNAME');
             $password= getenv('CCPASSWORD');
         }
+        $series = $input->getArgument('series') ? $input->getArgument('series') : false;
         $core = new Core($input, $output);
         $core->setLoginInformation($username, $password);
-        $core->gatherSeriesInformation();
+        $core->gatherSeriesInformation($series);
     }
 }
