@@ -20,7 +20,7 @@ class DownloadCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!getenv('USERNAME')) {
+        if (!getenv('CCUSERNAME')) {
             $helper = $this->getHelper('question');
             $username = new Question('Please enter your username: ');
             $username = $helper->ask($input, $output, $username);
