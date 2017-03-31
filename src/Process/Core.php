@@ -32,7 +32,7 @@ class Core
     public function gatherSeriesInformation($series=false)
     {
         $remotes = $this->remote->series($this->output);
-        if ($remotes->has($series)) {
+        if ($series && $remotes->has($series)) {
             $remotes = collect([$series => $remotes[$series]]);
         }
         echo PHP_EOL;
