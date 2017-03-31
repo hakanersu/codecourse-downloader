@@ -27,5 +27,5 @@ if you want to download specific series you can pass series slug as an argument.
 
 For example if you want to download https://www.codecourse.com/lessons/learn-es6
 ```
-php codecorse download learn-es6
+php codecourse download learn-es6
 ```
