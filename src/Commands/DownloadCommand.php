@@ -38,8 +38,8 @@ class DownloadCommand extends Command
                 exit;
             }
         } else {
-            $username = getenv('USERNAME');
-            $password= getenv('PASSWORD');
+            $username = getenv('CCUSERNAME');
+            $password= getenv('CCPASSWORD');
         }
         $core = new Core($input, $output);
         $core->setLoginInformation($username, $password);
