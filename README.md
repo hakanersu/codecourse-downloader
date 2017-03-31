@@ -16,5 +16,6 @@ If you dont want to save your username and password in configuration file just r
 ## Installation
 - Clone this repo to a folder in your machine
 - Change your info in .env.example and rename it to .env
+- Open up .env file change the value of CCUSERNAME to your Email and CCPASSWORD to your PASSWORD
 - `composer install`
 - `php codecourse download` and you are done!
