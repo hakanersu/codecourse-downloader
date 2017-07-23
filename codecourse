@@ -1,7 +1,6 @@
 #! /usr/bin/env php
 <?php
 
-use App\Commands\ShowCommand;
 use App\Commands\DownloadCommand;
 use Dotenv\Dotenv;
 use Symfony\Component\Console\Application;
@@ -11,7 +10,7 @@ require 'vendor/autoload.php';
 const DEFAULT_DIR = __DIR__;
 $dotenv = new Dotenv(DEFAULT_DIR);
 $dotenv->load();
-$app = new Application('Codecourse downloader', '1.0');
+$app = new Application('Codecourse downloader', '2.0');
 $app->add(new DownloadCommand());
 
 $app->run();

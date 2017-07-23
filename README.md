@@ -23,9 +23,9 @@ If you dont want to save your username and password in configuration file just r
 
 #### Downloading series.
 
-if you want to download specific series you can pass series slug as an argument.
+if you want to download specific series you can pass comma separated series slugs as an argument.
 
 For example if you want to download https://www.codecourse.com/lessons/learn-es6
 ```
-php codecourse download learn-es6
+php codecourse download "learn-es6,flexbox-crash-course"
 ```
