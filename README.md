@@ -1,6 +1,6 @@
 # Codecourse Downloader
 
-*it seems codecourse.com implemented rate limit for website. So you can get errors till figure out a new way.*
+*it seems vimeo.com (video stream provider) implemented rate limit. So you can get errors till figure out a new way.*
 
 Download codecourse.com videos.
 ![Screenshot](screenshot.png)
