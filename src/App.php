@@ -58,6 +58,9 @@ class App
             if (!$files->exists($item)) {
                 $files->file->createDir($item);
             }
+            // fetch remote lesson on courses.
+            // Check local system for new ones.
+
         });
 
 

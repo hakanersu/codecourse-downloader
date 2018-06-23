@@ -28,111 +28,42 @@ class Parser
         return $this;
     }
 
-    /**
-     * Get CRSF token
-     *
-     * @return null | string
-     */
-    public function getCrsfToken()
+    public function page()
     {
-        return $this->crawler->filter("input[name=_token]")->attr('value');
-    }
-
-    /**
-     * Get series
-     *
-     * @return array
-     */
-    public function getSeries()
-    {
-        $series = [];
-        $this->crawler->filter('.library-item')->each(function(Crawler $node) use (&$series) {
-            $title = $node->filter('h2.library-item__title')->eq(0);
-
-            if (count($title->children()) > 0) {
-                $link = $title->children()->attr('href');
-                if (preg_match('/lessons\/(.*)/', $link, $matches)) {
-                    $series[$matches[1]] = 0;
-                }
-
-                $footer = $node->filter('.library-item__footer')->eq(0);
-                if (count($footer->children()) > 0) {
-                    $text = $footer->text();
-                    if (preg_match('/(\d+) part[s]?/', $text, $catch)) {
-                        $series[$matches[1]] = $catch[1];
-                    }
-                }
+        $nodes = $this->crawler->filter('script[type="text/javascript"]');
+        $lessons = [];
+        $nodes->each(function(Crawler $node) use (&$lessons) {
+            $text = trim($node->text());
+            $find = 'window.__NUXT__=';
+            if (strpos($text, $find) !== 0) {
+                return;
             }
+            $end = strlen($text) - strlen($find) - 1;
+            $nuxt_str = substr($text, strlen($find), $end);
+            $nuxt = json_decode($nuxt_str, true);
+            $lessons = $this->lesson($nuxt);
         });
-
-        return $series;
+        return $lessons;
     }
 
-    /**
-     * Get next page
-     *
-     * @return bool|null|string
-     */
-    public  function getNextPage()
+    public function lesson($nuxt)
     {
-        $node = $this->crawler->filter('[rel=next]');
-        if ($node->count() > 0) {
-            return $node->attr('href');
+        $parts = $nuxt['state']['watch']['parts'];
+        $lessons = [];
+        foreach($parts as $i => $part) {
+            $id = $part['video']['id'];
+            $quality = $this->bestQuality($part);
+            // TODO I left here.
+            $lesson = new Lesson;
+            $lesson->link = getenv('API_URL').'/api/videos/'.$id.'/download?quality='.$quality;
+            $lesson->title = $part['slug'];
+            $lesson->filename = sprintf('%02d', $i).'-'.$part['slug'].'.mp4';
+            $lessons[] = $lesson;
         }
-
-        return false;
+        return $lessons;
     }
 
-    /**
-     * Total pages
-     *
-     * @return int
-     */
-    public function totalPages()
-    {
-        $node = $this->crawler->filter('.pagination li');
-        $count = $node->count();
-
-        if ($node->count() > 0) {
-            return (int) $node->eq($count-2)->text();
-        }
-
-        return 0;
-    }
-
-    /**
-     * Get lesson links
-     *
-     * @return Collection
-     */
-    public function getLessonLinks()
-    {
-        $slugify = new Slugify();
-        $filesCollection = new Collection();
-
-        $nodes = $this->crawler->filter('.large-8 .container-list__link');
-
-        if ($nodes->count()) {
-            $linkCrawler = $this->crawler->selectLink('Download full code');
-            if ($linkCrawler->count()) {
-                $zip = new Zip();
-                $zip->setLink($linkCrawler->link()->getUri());
-                $zip->setFilename("code");
-                $zip->setTitle("Full code");
-
-                $filesCollection->push($zip);
-            }
-
-            $nodes->each(function(Crawler $node, $i) use ($filesCollection, $slugify) {
-                $video = new Video();
-                $video->setLink($node->attr('href'));
-                $video->setFilename(sprintf("%02d", $i)."-".$node->filter('.container-list__item-header')->text());
-                $video->setTitle($node->filter('.container-list__item-header')->text());
-
-                $filesCollection->push($video);
-            });
-        }
-
-        return $filesCollection;
+    protected function bestQuality($part) {
+        return $part['video']['download_qualities_enabled'][0]['value'];
     }
 }

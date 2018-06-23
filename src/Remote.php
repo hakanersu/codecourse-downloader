@@ -93,6 +93,15 @@ class Remote
         }
     }
 
+    public function getCourse($slug)
+    {
+        $response = $this->web->request('GET', "watch/{$slug}", [
+            'cookies' => $this->cookie
+        ]);
+        $html = $response->getBody()->getContents();
+        return (new LessonParser)->parse($html);
+    }
+
     public function page($number)
     {
         try {
