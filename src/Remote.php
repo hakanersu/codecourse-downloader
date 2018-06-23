@@ -140,13 +140,14 @@ class Remote
 
     private function getRedirectUrl($url)
     {
-        $response = $this->web->request('GET', $url, [
-            'cookies'           => $this->cookie,
-            'allow_redirects'   => false,
-            'verify'            => false
+        $response = $this->guzzle->request('POST', $url, [
+            'cookies' => $this->cookie,
+            'headers' => [
+                'authorization' => 'Bearer '.$this->token
+            ]
         ]);
-
-        return $response->getHeader('Location')[0];
+        $content = json_decode($response->getBody(), true);
+        return $content['data'];
     }
 
     /**
