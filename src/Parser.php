@@ -1,11 +1,12 @@
 <?php
 namespace App;
 
-use App\Models\Video;
 use App\Models\Zip;
+use App\Models\Video;
+use App\Models\Lesson;
+use Cocur\Slugify\Slugify;
 use Illuminate\Support\Collection;
 use Symfony\Component\DomCrawler\Crawler;
-use Cocur\Slugify\Slugify;
 
 class Parser
 {
@@ -31,8 +32,9 @@ class Parser
     public function page()
     {
         $nodes = $this->crawler->filter('script[type="text/javascript"]');
+       
         $lessons = [];
-        $nodes->each(function(Crawler $node) use (&$lessons) {
+        $nodes->each(function (Crawler $node) use (&$lessons) {
             $text = trim($node->text());
             $find = 'window.__NUXT__=';
             if (strpos($text, $find) !== 0) {
@@ -43,6 +45,7 @@ class Parser
             $nuxt = json_decode($nuxt_str, true);
             $lessons = $this->lesson($nuxt);
         });
+        
         return $lessons;
     }
 
@@ -50,10 +53,9 @@ class Parser
     {
         $parts = $nuxt['state']['watch']['parts'];
         $lessons = [];
-        foreach($parts as $i => $part) {
+        foreach ($parts as $i => $part) {
             $id = $part['video']['id'];
             $quality = $this->bestQuality($part);
-            // TODO I left here.
             $lesson = new Lesson;
             $lesson->link = getenv('API_URL').'/api/videos/'.$id.'/download?quality='.$quality;
             $lesson->title = $part['slug'];
@@ -63,7 +65,8 @@ class Parser
         return $lessons;
     }
 
-    protected function bestQuality($part) {
+    protected function bestQuality($part)
+    {
         return $part['video']['download_qualities_enabled'][0]['value'];
     }
 }

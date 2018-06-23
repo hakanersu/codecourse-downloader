@@ -1,22 +1,23 @@
 <?php
 namespace App;
 
-
 class FileLister extends Lister
 {
     public function all()
     {
         $files = collect($this->file->listContents('', true));
         $all = [];
-        foreach($files as $file){
-            if (substr($file['basename'],0,1) == '.') continue;
+        foreach ($files as $file) {
+            if (substr($file['basename'], 0, 1) == '.') {
+                continue;
+            }
 
-            if($file['type'] == 'dir' && !isset($all[$file['basename']])) {
+            if ($file['type'] == 'dir' && !isset($all[$file['basename']])) {
                 $all[$file['basename']] = [];
             }
 
             if ($file['type'] == 'file') {
-                $serie = substr($file['path'],0,-(strlen($file['basename']) + 1));
+                $serie = substr($file['path'], 0, -(strlen($file['basename']) + 1));
                 if (!isset($all[$serie])) {
                     $all[$serie] = [];
                 }

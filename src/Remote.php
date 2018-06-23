@@ -81,7 +81,7 @@ class Remote
     public function meta()
     {
         try {
-            $api = $this->api->request('GET',getenv('COURSES'), [
+            $api = $this->api->request('GET', getenv('COURSES'), [
                 'cookies' => $this->cookie,
                 'base_uri' => getenv('API')
             ]);
@@ -98,8 +98,11 @@ class Remote
         $response = $this->web->request('GET', "watch/{$slug}", [
             'cookies' => $this->cookie
         ]);
+
         $html = $response->getBody()->getContents();
-        return (new LessonParser)->parse($html);
+      
+
+        return (new Parser)->parse($html);
     }
 
     public function page($number)
@@ -123,14 +126,14 @@ class Remote
      * @param string $lesson
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function downloadFile($file, $lesson)
+    public function downloadFile($course, $lesson)
     {
         try {
-            $this->guzzle->request('GET', $this->getRedirectUrl($file->getLink()), [
-                'sink' => getenv('DOWNLOAD_FOLDER') . "/{$lesson}/{$file->getFilename()}"
-            ]);
+            $url = $this->getRedirectUrl($lesson->link);
+            $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
+            $this->guzzle->request('GET', $url, ['sink' => $sink]);
         } catch (\Exception $e) {
-            $this->io->error("Cant download '{$file->getTitle()}' ({$e->getMessage()})");
+            $this->io->error("Cant download '{$lesson->title}' ({$e->getMessage()})");
         }
     }
 
