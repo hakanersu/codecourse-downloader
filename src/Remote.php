@@ -3,6 +3,7 @@ namespace App;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -12,7 +13,7 @@ class Remote
     /**
      * @var Client $guzzle
      */
-    protected $guzzle;
+    protected $web;
 
     /**
      * @var  CookieJar $cookie
@@ -27,12 +28,17 @@ class Remote
     /**
      * @var SymfonyStyle $io
      */
-    private $io;
+    public $io;
+
+    protected $api;
+
+    protected $token;
 
     public function __construct($username, $password, $io)
     {
         $this->cookie = new CookieJar();
-        $this->guzzle = new Client(['base_uri' => getenv('BASE_URL')]);
+        $this->web = new Client(['base_uri' => getenv('BASE_URL')]);
+        $this->api = new Client(['base_uri' => getenv('API')]);
         $this->parser = new Parser;
 
         $this->login($username, $password);
@@ -45,89 +51,68 @@ class Remote
      * @param $username
      * @param $password
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
     public function login($username, $password)
     {
-        $response = $this->guzzle->request('GET', getenv('LOGIN_PATH'), [
-            'cookies' => $this->cookie,
-            'verify' => false
-        ]);
-
-        $csrfToken = $this->parser->parse($response->getBody()->getContents())->getCrsfToken();
-
-        $response = $this->guzzle->request('POST', getenv('LOGIN_PATH'), [
-            'cookies' => $this->cookie,
-            'form_params'    => [
-                'email'    => $username,
-                'password' => $password,
-                '_token'   => $csrfToken,
-                'remember' => 1,
-            ],
-            'verify' => false
-        ]);
-
-        $content = $response->getBody()->getContents();
-
-        if(strpos($content, "Couldn't sign you in with those details.") !== false) {
-            throw new \Exception("Couldn't sign you in with those details.");
-        }
-
-        if(strpos($content, "Couldn&#039;t sign you in with those details.") !== false) {
-            throw new \Exception("Couldn't sign you in with those details.");
-        }
-
-        if(strpos($content, "Could not find that account") !== false) {
-            throw new \Exception("This account doesn't exist");
+        try {
+            $response = $this->api->request('POST', getenv('LOGIN_PATH'), [
+                'cookies' => $this->cookie,
+                'form_params' => [
+                    'email' => $username,
+                    'password' => $password,
+                ]
+            ]);
+            $content = json_decode($response->getBody());
+            $this->token = $content->data->token;
+            success("Logged in successfully, collecting courses.");
+        } catch (GuzzleException $e) {
+            error("Can't login to website.");
+            exit;
+        } catch (\Exception $e) {
+            error("Error on login: ".$e->getMessage());
+            exit;
         }
     }
 
-    /**
-     * Series
-     *
-     * @return Collection
-     */
-    public function fetchSeries()
-    {
-        $this->io->section("Fetching all series...");
-        $response = $this->guzzle->request('GET', 'lessons', ['verify' => false]);
-        $parse  =  $this->parser->parse((string) $response->getBody());
-        $series = $parse->getSeries();
-        $progress = new ProgressBar($this->io, $parse->totalPages());
-        $progress->start();
-        $nextPage = $parse->getNextPage();
-        while($nextPage) {
-            $progress->advance();
-            $request = $this->guzzle->request('GET', str_replace(getenv('BASE_URL'), '', $nextPage), ['verify' => false])->getBody();
-            $nextSeries = $this->parser->parse((string) $request);
-            $series = array_merge($series, $nextSeries->getSeries());
-            $nextPage = $nextSeries->getNextPage();
-        }
-        $progress->finish();
 
-        return collect($series);
+
+    public function meta()
+    {
+        try {
+            $api = $this->api->request('GET',getenv('COURSES'), [
+                'cookies' => $this->cookie,
+                'base_uri' => getenv('API')
+            ]);
+            $data = json_decode($api->getBody());
+            return $data;
+        } catch (GuzzleException $e) {
+            error("Can't fetch courses.");
+            exit;
+        }
     }
 
-    /**
-     * Get lessons
-     *
-     * @param $series
-     * @return Collection
-     */
-    public function fetchLessons($series)
+    public function page($number)
     {
-        $response = $this->guzzle->request('GET', "lessons/{$series}", [
-            'cookies' => $this->cookie,
-            'verify' => false
-        ]);
-
-        $content = $response->getBody()->getContents();
-        return $this->parser->parse($content)->getLessonLinks();
+        try {
+            $courses = $this->api->request('GET', getenv('COURSES') . "?page={$number}", [
+                'cookies' => $this->cookie,
+                'base_uri' => getenv('API')
+            ]);
+            $courses = json_decode($courses->getBody());
+            $links = collect($courses->data);
+            return $links->pluck('slug')->toArray();
+        } catch (GuzzleException $e) {
+            error("Can't fetch lessons.");
+            exit;
+        }
     }
 
     /**
      * @param object $file
      * @param string $lesson
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function downloadFile($file, $lesson)
     {

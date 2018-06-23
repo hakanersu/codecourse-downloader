@@ -52,9 +52,9 @@ class DownloadCommand extends Command
             $series = explode(',', $input->getArgument('series'));
         }
 
-        $app = new App($username, $password, $io);
+        $app = new App($username, $password, $io, $output);
         $app->download($series);
 
-        $io->success("Finish: " . getenv('DOWNLOAD_FOLDER'));
+        //$io->success("Finish: " . getenv('DOWNLOAD_FOLDER'));
     }
 }

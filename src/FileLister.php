@@ -35,6 +35,11 @@ class FileLister extends Lister
         return $this->all()->keys();
     }
 
+    public function exists($folder)
+    {
+        return $this->file->has($folder);
+    }
+
     /**
      * @param bool $lesson
      * @return \Illuminate\Support\Collection|static
