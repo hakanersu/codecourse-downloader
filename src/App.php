@@ -73,7 +73,7 @@ class App
             if (!$file->exists("{$item}/{$lesson->title}")) {
                 // Download video.
                 success("Downloading video: {$lesson->title}");
-                $this->remote->downloadFile($item, $lesson)
+                $this->remote->downloadFile($item, $lesson);
             }
         }
     }

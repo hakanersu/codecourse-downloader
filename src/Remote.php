@@ -131,15 +131,16 @@ class Remote
         try {
             $url = $this->getRedirectUrl($lesson->link);
             $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
-            $this->guzzle->request('GET', $url, ['sink' => $sink]);
+            $this->web->request('GET', $url, ['sink' => $sink]);
         } catch (\Exception $e) {
-            $this->io->error("Cant download '{$lesson->title}' ({$e->getMessage()})");
+            error("Cant download '{$lesson->title}'. Do you have active subscription?");
+            exit;
         }
     }
 
     private function getRedirectUrl($url)
     {
-        $response = $this->guzzle->request('GET', $url, [
+        $response = $this->web->request('GET', $url, [
             'cookies'           => $this->cookie,
             'allow_redirects'   => false,
             'verify'            => false
