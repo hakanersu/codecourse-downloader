@@ -1,9 +1,7 @@
 # Codecourse Downloader
 
-*it seems vimeo.com (video stream provider) implemented rate limit. So you can get errors till figure out a new way.*
-
 Download codecourse.com videos.
-![Screenshot](screenshot.png)
+
 ## Description
 Inspired from iamfreee/laracasts-downloader. Download or update your local catalogue with codecourse.com series.
 

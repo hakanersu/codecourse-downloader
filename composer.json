@@ -6,8 +6,7 @@
     "symfony/css-selector": "~3.0@dev",
     "vlucas/phpdotenv": "^2.3",
     "tightenco/collect": "^5.4",
-    "league/flysystem": "~1.0",
-    "cocur/slugify": "^2.4"
+    "league/flysystem": "~1.0"
   },
   "autoload": {
     "psr-4": {

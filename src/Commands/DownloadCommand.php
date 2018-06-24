@@ -32,7 +32,7 @@ class DownloadCommand extends Command
             $username = $helper->ask($input, $output, $username);
 
             if (empty($username)) {
-                $io->error("You have to enter username.");
+                error("You have to enter username.");
                 return;
             }
         }
@@ -42,7 +42,7 @@ class DownloadCommand extends Command
             $password = $helper->ask($input, $output, $password);
 
             if (empty($password)) {
-                $io->error("You have to enter password.");
+                error("You have to enter password.");
                 return;
             }
         }
@@ -52,9 +52,9 @@ class DownloadCommand extends Command
             $series = explode(',', $input->getArgument('series'));
         }
 
-        $app = new App($username, $password, $io, $output);
+        $app = new App($username, $password, $io);
         $app->download($series);
 
-        //$io->success("Finish: " . getenv('DOWNLOAD_FOLDER'));
+        success("Finish: " . getenv('DOWNLOAD_FOLDER'));
     }
 }

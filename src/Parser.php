@@ -1,11 +1,6 @@
 <?php
 namespace App;
 
-use App\Models\Zip;
-use App\Models\Video;
-use App\Models\Lesson;
-use Cocur\Slugify\Slugify;
-use Illuminate\Support\Collection;
 use Symfony\Component\DomCrawler\Crawler;
 
 class Parser
@@ -29,7 +24,7 @@ class Parser
         return $this;
     }
 
-    public function page()
+    public function getPage()
     {
         $nodes = $this->crawler->filter('script[type="text/javascript"]');
        
@@ -56,10 +51,12 @@ class Parser
         foreach ($parts as $i => $part) {
             $id = $part['video']['id'];
             $quality = $this->bestQuality($part);
-            $lesson = new Lesson;
-            $lesson->link = getenv('API_URL').'/api/videos/'.$id.'/download?quality='.$quality;
-            $lesson->title = $part['slug'];
-            $lesson->filename = sprintf('%02d', $i).'-'.$part['slug'].'.mp4';
+            $lesson = (object) [
+                'link' => getenv('API_URL').'/api/videos/'.$id.'/download?quality='.$quality,
+                'title' => $part['slug'],
+                'filename' => sprintf('%02d', $i).'-'.$part['slug'].'.mp4'
+            ];
+
             $lessons[] = $lesson;
         }
         return $lessons;

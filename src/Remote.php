@@ -51,7 +51,6 @@ class Remote
      * @param $username
      * @param $password
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
     public function login($username, $password)
@@ -76,8 +75,6 @@ class Remote
         }
     }
 
-
-
     public function meta()
     {
         try {
@@ -95,14 +92,15 @@ class Remote
 
     public function getCourse($slug)
     {
-        $response = $this->web->request('GET', "watch/{$slug}", [
-            'cookies' => $this->cookie
-        ]);
-
-        $html = $response->getBody()->getContents();
-      
-
-        return (new Parser)->parse($html);
+        try {
+            $response = $this->web->request('GET', "watch/{$slug}", [
+                'cookies' => $this->cookie
+            ]);
+            $html = $response->getBody()->getContents();
+            return ((new Parser)->parse($html));
+        } catch (GuzzleException $e) {
+            error("Can't fetch course url");
+        }
     }
 
     public function page($number)
@@ -116,15 +114,15 @@ class Remote
             $links = collect($courses->data);
             return $links->pluck('slug')->toArray();
         } catch (GuzzleException $e) {
-            error("Can't fetch lessons.");
+            error("Can't fetch course page.");
             exit;
         }
     }
 
     /**
-     * @param object $file
+     * @param $course
      * @param string $lesson
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function downloadFile($course, $lesson)
     {
@@ -140,14 +138,19 @@ class Remote
 
     private function getRedirectUrl($url)
     {
-        $response = $this->guzzle->request('POST', $url, [
-            'cookies' => $this->cookie,
-            'headers' => [
-                'authorization' => 'Bearer '.$this->token
-            ]
-        ]);
-        $content = json_decode($response->getBody(), true);
-        return $content['data'];
+        try {
+            $response = $this->web->request('POST', $url, [
+                'cookies' => $this->cookie,
+                'headers' => [
+                    'authorization' => 'Bearer ' . $this->token
+                ]
+            ]);
+            $content = json_decode($response->getBody(), true);
+            return $content['data'];
+        } catch (GuzzleException $e) {
+            error("Can't fetch redirect url");
+        }
+        return false;
     }
 
     /**

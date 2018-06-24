@@ -1,8 +1,19 @@
 <?php
 namespace App;
 
-class FileLister extends Lister
+use League\Flysystem\Filesystem;
+use League\Flysystem\Adapter\Local as Adapter;
+
+class FileLister
 {
+    public $file;
+
+    public function __construct()
+    {
+        $this->file = new Filesystem(
+            new Adapter(getenv('DOWNLOAD_FOLDER'))
+        );
+    }
     public function all()
     {
         $files = collect($this->file->listContents('', true));
@@ -17,11 +28,11 @@ class FileLister extends Lister
             }
 
             if ($file['type'] == 'file') {
-                $serie = substr($file['path'], 0, -(strlen($file['basename']) + 1));
-                if (!isset($all[$serie])) {
-                    $all[$serie] = [];
+                $series = substr($file['path'], 0, -(strlen($file['basename']) + 1));
+                if (!isset($all[$series])) {
+                    $all[$series] = [];
                 }
-                array_push($all[$serie], $file['basename']);
+                array_push($all[$series], $file['basename']);
             }
         }
 
@@ -43,14 +54,13 @@ class FileLister extends Lister
 
     /**
      * @param bool $lesson
-     * @return \Illuminate\Support\Collection|static
+     * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
      */
     public function lessons($lesson = false)
     {
         if ($lesson) {
             return collect($this->all()->keyBy($lesson)->first());
         }
-
         return $this->all()->values();
     }
 }

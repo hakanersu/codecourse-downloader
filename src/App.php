@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -49,18 +50,22 @@ class App
                 $courses = array_merge($courses, $slugs);
             }
         }
-
+        // Collect courses.
         $courses = collect($courses);
 
         $files = new FileLister();
 
-        $courses->map(function ($item, $key) use ($files) {
+        $courses->map(/**
+         * @param $item
+         * @param $key
+         */
+            function ($item, $key) use ($files) {
             if (!$files->exists($item)) {
                 $files->file->createDir($item);
             }
             
             // fetch remote lesson on courses.
-            $lessons = $this->remote->getCourse($item)->page();
+            $lessons = $this->remote->getCourse($item)->getPage();
             $this->getLessons($item, $lessons);
         });
     }
@@ -73,7 +78,9 @@ class App
             if (!$file->exists("{$item}/{$lesson->title}")) {
                 // Download video.
                 success("Downloading video: {$lesson->title}");
+
                 $this->remote->downloadFile($item, $lesson);
+
             }
         }
     }
