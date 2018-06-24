@@ -55,11 +55,7 @@ class App
 
         $files = new FileLister();
 
-        $courses->map(/**
-         * @param $item
-         * @param $key
-         */
-            function ($item, $key) use ($files) {
+        $courses->map(function ($item, $key) use ($files) {
             if (!$files->exists($item)) {
                 $files->file->createDir($item);
             }
@@ -80,7 +76,6 @@ class App
                 success("Downloading video: {$lesson->title}");
 
                 $this->remote->downloadFile($item, $lesson);
-
             }
         }
     }
