@@ -82,7 +82,9 @@ class App
             $progressBar->start();
 
             foreach ($lessons as $lesson) {
-                if (! $files->exists("{$course}/{$lesson->slug}")) {
+                $sink = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
+
+                if (! $files->exists($sink)) {
                     $file = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
                     if (! $files->exists($file)) {
                         $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
@@ -90,7 +92,7 @@ class App
 
                         try {
                             $url = $this->remote->getRedirectUrl($lesson->link);
-                            $sink = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
+
                             $this->remote->web->request('GET', $url, [
                                 'sink' => $sink,
                                 'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
