@@ -83,10 +83,8 @@ class App
 
             foreach ($lessons as $lesson) {
                 $sink = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
-
-                if (! $files->exists($sink)) {
-                    $file = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
-                    if (! $files->exists($file)) {
+                if (! $files->exists("{$course}/{$lesson->slug}")) {
+                    if (! file_exists($sink)) {
                         $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
                         $progressBar->advance();
 
@@ -111,6 +109,7 @@ class App
                         }
                     } else {
                         $progressBar->setMessage("Skipping, already downloaded ({$course}): {$lesson->title}", 'status');
+                        $progressBar->advance();
                     }
                 }
             }
