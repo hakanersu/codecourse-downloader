@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use GuzzleHttp\Client;
@@ -9,42 +10,41 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class Remote
 {
     /**
-     * @var Client $guzzle
-     */
-    protected $web;
-
-    /**
-     * @var  CookieJar $cookie
-     */
-    protected $cookie;
-
-    /**
-     * @var Parser $parser
-     */
-    protected $parser;
-
-    /**
-     * @var SymfonyStyle $io
+     * @var SymfonyStyle
      */
     public $io;
+    /**
+     * @var Client
+     */
+    public $web;
 
-    protected $api;
+    /**
+     * @var  CookieJar
+     */
+    public $cookie;
 
-    protected $token;
+    /**
+     * @var Parser
+     */
+    public $parser;
+
+    public $api;
+
+    public $token;
 
     public function __construct($username, $password, $io)
     {
         $this->cookie = new CookieJar();
         $this->web = new Client(['base_uri' => getenv('BASE_URL')]);
         $this->api = new Client(['base_uri' => getenv('API')]);
-        $this->parser = new Parser;
+        $this->parser = new Parser();
 
         $this->login($username, $password);
         $this->io = $io;
     }
 
     /**
-     * Login
+     * Login.
      *
      * @param $username
      * @param $password
@@ -59,16 +59,16 @@ class Remote
                 'form_params' => [
                     'email' => $username,
                     'password' => $password,
-                ]
+                ],
             ]);
             $content = json_decode($response->getBody());
             $this->token = $content->data->token;
-            success("Logged in successfully, collecting courses.");
+            success('Logged in successfully, collecting courses.');
         } catch (GuzzleException $e) {
             error("Can't login to website.");
             exit;
         } catch (\Exception $e) {
-            error("Error on login: ".$e->getMessage());
+            error('Error on login: '.$e->getMessage());
             exit;
         }
     }
@@ -78,9 +78,10 @@ class Remote
         try {
             $api = $this->api->request('GET', getenv('COURSES'), [
                 'cookies' => $this->cookie,
-                'base_uri' => getenv('API')
+                'base_uri' => getenv('API'),
             ]);
             $data = json_decode($api->getBody());
+
             return $data;
         } catch (GuzzleException $e) {
             error("Can't fetch courses.");
@@ -92,10 +93,11 @@ class Remote
     {
         try {
             $response = $this->web->request('GET', "watch/{$slug}", [
-                'cookies' => $this->cookie
+                'cookies' => $this->cookie,
             ]);
             $html = $response->getBody()->getContents();
-            return ((new Parser)->parse($html));
+
+            return (new Parser())->parse($html);
         } catch (GuzzleException $e) {
             error("Can't fetch course url");
         }
@@ -104,12 +106,13 @@ class Remote
     public function page($number)
     {
         try {
-            $courses = $this->api->request('GET', getenv('COURSES') . "?page={$number}", [
+            $courses = $this->api->request('GET', getenv('COURSES')."?page={$number}", [
                 'cookies' => $this->cookie,
-                'base_uri' => getenv('API')
+                'base_uri' => getenv('API'),
             ]);
             $courses = json_decode($courses->getBody());
             $links = collect($courses->data);
+
             return $links->pluck('slug')->toArray();
         } catch (GuzzleException $e) {
             error("Can't fetch course page.");
@@ -120,13 +123,14 @@ class Remote
     /**
      * @param $course
      * @param string $lesson
+     *
      * @throws GuzzleException
      */
     public function downloadFile($course, $lesson)
     {
         try {
             $url = $this->getRedirectUrl($lesson->link);
-            $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
+            $sink = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
             $this->web->request('GET', $url, ['sink' => $sink]);
         } catch (\Exception $e) {
             error("Cant download '{$lesson->title}'. Do you have active subscription?");
@@ -134,25 +138,27 @@ class Remote
         }
     }
 
-    private function getRedirectUrl($url)
+    public function getRedirectUrl($url)
     {
         try {
             $response = $this->web->request('POST', $url, [
                 'cookies' => $this->cookie,
                 'headers' => [
-                    'authorization' => 'Bearer ' . $this->token
-                ]
+                    'authorization' => 'Bearer '.$this->token,
+                ],
             ]);
             $content = json_decode($response->getBody(), true);
+
             return $content['data'];
         } catch (GuzzleException $e) {
             error("Can't fetch redirect url");
         }
+
         return false;
     }
 
     /**
-     * Create folder if does't exist
+     * Create folder if does't exist.
      *
      * @param $folder
      * @param $file
