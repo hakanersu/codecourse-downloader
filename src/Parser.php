@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use Symfony\Component\DomCrawler\Crawler;
@@ -6,12 +7,12 @@ use Symfony\Component\DomCrawler\Crawler;
 class Parser
 {
     /**
-     * @var Crawler $crawler
+     * @var Crawler
      */
     public $crawler;
 
     /**
-     * Parse HTML
+     * Parse HTML.
      *
      * @param $html
      *
@@ -27,7 +28,7 @@ class Parser
     public function getPage()
     {
         $nodes = $this->crawler->filter('script[type="text/javascript"]');
-       
+
         $lessons = [];
         $nodes->each(function (Crawler $node) use (&$lessons) {
             $text = trim($node->text());
@@ -40,7 +41,7 @@ class Parser
             $nuxt = json_decode($nuxt_str, true);
             $lessons = $this->lesson($nuxt);
         });
-        
+
         return $lessons;
     }
 
@@ -52,13 +53,14 @@ class Parser
             $id = $part['video']['id'];
             $quality = $this->bestQuality($part);
             $lesson = (object) [
-                'link' => getenv('API_URL').'/api/videos/'.$id.'/download?quality='.$quality,
+                'link' => getenv('API').'/api/videos/'.$id.'/download?quality='.$quality,
                 'title' => $part['slug'],
-                'filename' => sprintf('%02d', $i).'-'.$part['slug'].'.mp4'
+                'filename' => sprintf('%02d', $i).'-'.$part['slug'].'.mp4',
             ];
 
             $lessons[] = $lesson;
         }
+
         return $lessons;
     }
 
