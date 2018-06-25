@@ -96,7 +96,8 @@ class App
                                 'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
                                     $total = \ByteUnits\bytes($dl_total_size)->format('MB');
                                     $sofar = \ByteUnits\bytes($dl_size_so_far)->format('MB');
-                                    $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total}", 'status');
+                                    $percentage = $dl_total_size !='0.00' ? number_format($dl_size_so_far*100/$dl_total_size) : 0;
+                                    $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
                                     $progressBar->display();
                                 },
                             ]);
