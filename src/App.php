@@ -60,7 +60,7 @@ class App
                 $slugs = $this->remote->page($i);
                 $courses = array_merge($courses, $slugs);
             }
-            $progressBar->setMessage('Fetching pages complated.', 'status');
+            $progressBar->setMessage('Fetching pages completed.', 'status');
 
             $progressBar->finish();
         }
