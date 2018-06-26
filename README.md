@@ -2,6 +2,10 @@
 
 Download codecourse.com videos.
 
+```
+Please update your .env file if you updated from old version.
+```
+
 ## Description
 Inspired from iamfreee/laracasts-downloader. Download or update your local catalogue with codecourse.com series.
 
