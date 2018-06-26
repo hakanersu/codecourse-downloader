@@ -52,8 +52,8 @@ class Parser
         foreach ($parts as $i => $part) {
             $id = $part['video']['id'];
             $quality = $this->bestQuality($part);
-            $slug = $words = preg_replace('/[0-9\-]+/', '', $part['slug']);
-
+            $slug = $words = preg_replace('/[0-9]+/', '', $part['slug']);
+            $slug = ltrim($slug, '-');
             $lesson = (object) [
                 'link' => getenv('API').'/api/videos/'.$id.'/download?quality='.$quality,
                 'title' => $part['title'],
