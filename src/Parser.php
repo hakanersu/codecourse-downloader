@@ -58,7 +58,7 @@ class Parser
                 'link' => getenv('API').'/api/videos/'.$id.'/download?quality='.$quality,
                 'title' => $part['title'],
                 'slug' => $slug,
-                'filename' => sprintf('%02d', $i + 1).' - '.$slug.'.mp4',
+                'filename' => sprintf('%02d', $i).' - '.$slug.'.mp4',
             ];
 
             $lessons[] = $lesson;
