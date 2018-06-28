@@ -3,7 +3,7 @@
 Download codecourse.com videos.
 
 ```
-Please update your .env file if you updated from old version.
+Please update your .env file if you updated from an old version.
 ```
 
 ## Description
