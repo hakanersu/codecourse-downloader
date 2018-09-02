@@ -58,7 +58,7 @@ class App
             $progressBar->setMessage('Gathering data...', 'status');
 
             // Lets get the rest of the courses.
-            for ($i = 2; $i <= $meta->last_page; $i++) {
+            for ($i = 2; $i <= $meta->last_page; ++$i) {
                 $progressBar->advance();
                 $progressBar->setMessage("Fetching page: {$i}", 'status');
                 // Getting pages from codecourse api.
@@ -87,7 +87,7 @@ class App
             // Get single course and get lessons from it.
             $lessons = $this->remote->getCourse($course)->getPage();
 
-            // Progressbar 
+            // Progressbar
             $progressBar = new ProgressBar($output, count($lessons));
             $progressBar->setFormat("%status%\n%current%/%max%  [%bar%] %percent:3s%%\n");
             $progressBar->setMessage('Gathering course data', 'status');
@@ -96,12 +96,11 @@ class App
 
             foreach ($lessons as $lesson) {
                 // Filename with full path.
-                $sink = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
+                $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
 
                 // if we have file we will skip.
                 // Maybe i can check file size in future versions.
                 if (! $files->exists("{$course}/{$lesson->slug}")) {
-
                     if (! file_exists($sink)) {
                         $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
                         $progressBar->advance();
@@ -114,7 +113,7 @@ class App
                                 'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
                                     $total = \ByteUnits\bytes($dl_total_size)->format('MB');
                                     $sofar = \ByteUnits\bytes($dl_size_so_far)->format('MB');
-                                    $percentage = $dl_total_size !='0.00' ? number_format($dl_size_so_far*100/$dl_total_size) : 0;
+                                    $percentage = $dl_total_size != '0.00' ? number_format($dl_size_so_far * 100 / $dl_total_size) : 0;
                                     $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
                                     // It takes too much time to figure this line. Without advance() it was not update message.
                                     // With  this method i can update message.
@@ -134,7 +133,7 @@ class App
                     }
                 }
             }
-            $progressBar->setMessage('All videos dowloaded for course: '.$course, 'status');
+            $progressBar->setMessage('All videos dowloaded for course: ' . $course, 'status');
 
             $progressBar->finish();
         }

@@ -19,7 +19,7 @@ class Remote
     public $web;
 
     /**
-     * @var  CookieJar
+     * @var CookieJar
      */
     public $cookie;
 
@@ -68,7 +68,7 @@ class Remote
             error("Can't login to website.");
             exit;
         } catch (\Exception $e) {
-            error('Error on login: '.$e->getMessage());
+            error('Error on login: ' . $e->getMessage());
             exit;
         }
     }
@@ -106,7 +106,7 @@ class Remote
     public function page($number)
     {
         try {
-            $courses = $this->api->request('GET', getenv('COURSES')."?page={$number}", [
+            $courses = $this->api->request('GET', getenv('COURSES') . "?page={$number}", [
                 'cookies' => $this->cookie,
                 'base_uri' => getenv('API'),
             ]);
@@ -130,7 +130,7 @@ class Remote
     {
         try {
             $url = $this->getRedirectUrl($lesson->link);
-            $sink = getenv('DOWNLOAD_FOLDER')."/{$course}/{$lesson->filename}";
+            $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
             $this->web->request('GET', $url, ['sink' => $sink]);
         } catch (\Exception $e) {
             error("Cant download '{$lesson->title}'. Do you have active subscription?");
@@ -144,7 +144,7 @@ class Remote
             $response = $this->web->request('POST', $url, [
                 'cookies' => $this->cookie,
                 'headers' => [
-                    'authorization' => 'Bearer '.$this->token,
+                    'authorization' => 'Bearer ' . $this->token,
                 ],
             ]);
             $content = json_decode($response->getBody(), true);
