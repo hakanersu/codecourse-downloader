@@ -55,10 +55,10 @@ class Parser
             $slug = $words = preg_replace('/[0-9]+/', '', $part['slug']);
             $slug = ltrim($slug, '-');
             $lesson = (object) [
-                'link' => getenv('API').'/api/videos/'.$id.'/download?quality='.$quality,
+                'link' => getenv('API') . '/api/videos/' . $id . '/download?quality=' . $quality,
                 'title' => $part['title'],
                 'slug' => $slug,
-                'filename' => sprintf('%02d', $i).'-'.$slug.'.mp4',
+                'filename' => sprintf('%02d', $i) . '-' . $slug . '.mp4',
             ];
 
             $lessons[] = $lesson;

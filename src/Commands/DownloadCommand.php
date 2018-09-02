@@ -57,6 +57,6 @@ class DownloadCommand extends Command
         $app = new App($username, $password, $io);
         $app->download($output, $series);
 
-        success('Finish: '.getenv('DOWNLOAD_FOLDER'));
+        success('Finish: ' . getenv('DOWNLOAD_FOLDER'));
     }
 }

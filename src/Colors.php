@@ -4,14 +4,12 @@ namespace App;
 
 /**
  * Class Colors
- * https://www.if-not-true-then-false.com/2010/php-class-for-coloring-php-command-line-cli-scripts-output-php-output-colorizing-using-bash-shell-colors/
- *
- * @package App
+ * https://www.if-not-true-then-false.com/2010/php-class-for-coloring-php-command-line-cli-scripts-output-php-output-colorizing-using-bash-shell-colors/.
  */
 class Colors
 {
-    private $foreground_colors = array();
-    private $background_colors = array();
+    private $foreground_colors = [];
+    private $background_colors = [];
 
     public function __construct()
     {
@@ -46,19 +44,19 @@ class Colors
     // Returns colored string
     public function getColoredString($string, $foreground_color = null, $background_color = null)
     {
-        $colored_string = "";
+        $colored_string = '';
 
         // Check if given foreground color found
         if (isset($this->foreground_colors[$foreground_color])) {
-            $colored_string .= "\033[" . $this->foreground_colors[$foreground_color] . "m";
+            $colored_string .= "\033[" . $this->foreground_colors[$foreground_color] . 'm';
         }
         // Check if given background color found
         if (isset($this->background_colors[$background_color])) {
-            $colored_string .= "\033[" . $this->background_colors[$background_color] . "m";
+            $colored_string .= "\033[" . $this->background_colors[$background_color] . 'm';
         }
 
         // Add string and end coloring
-        $colored_string .=  $string . "\033[0m";
+        $colored_string .= $string . "\033[0m";
 
         return $colored_string;
     }

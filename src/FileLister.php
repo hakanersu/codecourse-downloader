@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use League\Flysystem\Filesystem;
@@ -14,6 +15,7 @@ class FileLister
             new Adapter(getenv('DOWNLOAD_FOLDER'))
         );
     }
+
     public function all()
     {
         $files = collect($this->file->listContents('', true));
@@ -23,13 +25,13 @@ class FileLister
                 continue;
             }
 
-            if ($file['type'] == 'dir' && !isset($all[$file['basename']])) {
+            if ($file['type'] == 'dir' && ! isset($all[$file['basename']])) {
                 $all[$file['basename']] = [];
             }
 
             if ($file['type'] == 'file') {
                 $series = substr($file['path'], 0, -(strlen($file['basename']) + 1));
-                if (!isset($all[$series])) {
+                if (! isset($all[$series])) {
                     $all[$series] = [];
                 }
                 array_push($all[$series], $file['basename']);
@@ -54,6 +56,7 @@ class FileLister
 
     /**
      * @param bool $lesson
+     *
      * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
      */
     public function lessons($lesson = false)
@@ -61,6 +64,7 @@ class FileLister
         if ($lesson) {
             return collect($this->all()->keyBy($lesson)->first());
         }
+
         return $this->all()->values();
     }
 }
