@@ -8,6 +8,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class App
 {
+	protected $download_confirmation = false;
+
     /**
      * @var SymfonyStyle
      */
@@ -39,6 +41,21 @@ class App
     {
         // if we have an empty series we will fetch all series
         if (empty($courses)) {
+
+        	$message   =  "\n When downloading the courses do you want to ask for the confirmation for each course ? [y/n] ? ";
+			print $message;
+			@flush();
+			@ob_flush();
+			$confirmation  =  trim( fgets( STDIN ) );
+			if ( $confirmation !== 'y' ) {
+			   
+				$this->download_confirmation = false;
+			}
+			else
+			{
+				$this->download_confirmation = true;	
+			}
+
             $remote = $this->remote->meta();
 
             // Meta holds information about courses.
@@ -84,58 +101,132 @@ class App
                 $files->file->createDir($course);
             }
 
-            // Get single course and get lessons from it.
-            $lessons = $this->remote->getCourse($course)->getPage();
+            if($this->download_confirmation == false)
+			{
 
-            // Progressbar
-            $progressBar = new ProgressBar($output, count($lessons));
-            $progressBar->setFormat("%status%\n%current%/%max%  [%bar%] %percent:3s%%\n");
-            $progressBar->setMessage('Gathering course data', 'status');
+				$lessons = $this->remote->getCourse($course)->getPage();
 
-            $progressBar->start();
+	            // Progressbar
+	            $progressBar = new ProgressBar($output, count($lessons));
+	            $progressBar->setFormat("%status%\n%current%/%max%  [%bar%] %percent:3s%%\n");
+	            $progressBar->setMessage('Gathering course data', 'status');
 
-            foreach ($lessons as $lesson) {
-                // Filename with full path.
-                $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
+	            $progressBar->start();
 
-                // if we have file we will skip.
-                // Maybe i can check file size in future versions.
-                if (! $files->exists("{$course}/{$lesson->slug}")) {
-                    if (! file_exists($sink)) {
-                        $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
-                        $progressBar->advance();
+	            foreach ($lessons as $lesson) {
+	                // Filename with full path.
+	                $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
 
-                        try {
-                            $url = $this->remote->getRedirectUrl($lesson->link);
+	                // if we have file we will skip.
+	                // Maybe i can check file size in future versions.
+	                if (! $files->exists("{$course}/{$lesson->slug}")) {
+	                    if (! file_exists($sink)) {
+	                        $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
+	                        $progressBar->advance();
 
-                            $this->remote->web->request('GET', $url, [
-                                'sink' => $sink,
-                                'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
-                                    $total = \ByteUnits\bytes($dl_total_size)->format('MB');
-                                    $sofar = \ByteUnits\bytes($dl_size_so_far)->format('MB');
-                                    $percentage = $dl_total_size != '0.00' ? number_format($dl_size_so_far * 100 / $dl_total_size) : 0;
-                                    $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
-                                    // It takes too much time to figure this line. Without advance() it was not update message.
-                                    // With  this method i can update message.
-                                    $progressBar->display();
-                                },
-                            ]);
-                        } catch (\Exception $e) {
-                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
-                            exit;
-                        } catch (GuzzleException $e) {
-                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
-                            exit;
-                        }
-                    } else {
-                        $progressBar->setMessage("Skipping, already downloaded ({$course}): {$lesson->title}", 'status');
-                        $progressBar->advance();
-                    }
-                }
-            }
-            $progressBar->setMessage('All videos dowloaded for course: ' . $course, 'status');
+	                        try {
+	                            $url = $this->remote->getRedirectUrl($lesson->link);
 
-            $progressBar->finish();
+	                            $this->remote->web->request('GET', $url, [
+	                                'sink' => $sink,
+	                                'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
+	                                    $total = \ByteUnits\bytes($dl_total_size)->format('MB');
+	                                    $sofar = \ByteUnits\bytes($dl_size_so_far)->format('MB');
+	                                    $percentage = $dl_total_size != '0.00' ? number_format($dl_size_so_far * 100 / $dl_total_size) : 0;
+	                                    $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
+	                                    // It takes too much time to figure this line. Without advance() it was not update message.
+	                                    // With  this method i can update message.
+	                                    $progressBar->display();
+	                                },
+	                            ]);
+	                        } catch (\Exception $e) {
+	                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
+	                            exit;
+	                        } catch (GuzzleException $e) {
+	                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
+	                            exit;
+	                        }
+	                    } else {
+	                        $progressBar->setMessage("Skipping, already downloaded ({$course}): {$lesson->title}", 'status');
+	                        $progressBar->advance();
+	                    }
+	                }
+	            }
+	            $progressBar->setMessage('All videos dowloaded for course: ' . $course, 'status');
+
+	            $progressBar->finish();
+
+			}
+			else
+			{
+				$message   =  "Do you want to download [y/n] : $course ?";
+				print $message;
+				@flush();
+				@ob_flush();
+				$confirmation  =  trim( fgets( STDIN ) );
+				if ( $confirmation !== 'y' ) {
+				   
+				   continue;
+				}
+				else
+				{
+					$lessons = $this->remote->getCourse($course)->getPage();
+
+		            // Progressbar
+		            $progressBar = new ProgressBar($output, count($lessons));
+		            $progressBar->setFormat("%status%\n%current%/%max%  [%bar%] %percent:3s%%\n");
+		            $progressBar->setMessage('Gathering course data', 'status');
+
+		            $progressBar->start();
+
+		            foreach ($lessons as $lesson) {
+		                // Filename with full path.
+		                $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
+
+		                // if we have file we will skip.
+		                // Maybe i can check file size in future versions.
+		                if (! $files->exists("{$course}/{$lesson->slug}")) {
+		                    if (! file_exists($sink)) {
+		                        $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
+		                        $progressBar->advance();
+
+		                        try {
+		                            $url = $this->remote->getRedirectUrl($lesson->link);
+
+		                            $this->remote->web->request('GET', $url, [
+		                                'sink' => $sink,
+		                                'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
+		                                    $total = \ByteUnits\bytes($dl_total_size)->format('MB');
+		                                    $sofar = \ByteUnits\bytes($dl_size_so_far)->format('MB');
+		                                    $percentage = $dl_total_size != '0.00' ? number_format($dl_size_so_far * 100 / $dl_total_size) : 0;
+		                                    $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
+		                                    // It takes too much time to figure this line. Without advance() it was not update message.
+		                                    // With  this method i can update message.
+		                                    $progressBar->display();
+		                                },
+		                            ]);
+		                        } catch (\Exception $e) {
+		                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
+		                            exit;
+		                        } catch (GuzzleException $e) {
+		                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
+		                            exit;
+		                        }
+		                    } else {
+		                        $progressBar->setMessage("Skipping, already downloaded ({$course}): {$lesson->title}", 'status');
+		                        $progressBar->advance();
+		                    }
+		                }
+		            }
+		            $progressBar->setMessage('All videos dowloaded for course: ' . $course, 'status');
+
+		            $progressBar->finish();
+				}
+
+			}
+	            
+
+            
         }
     }
 }
