@@ -27,7 +27,7 @@ class Parser
 
     public function getPage()
     {
-        $nodes = $this->crawler->filter('script[type="text/javascript"]');
+        $nodes = $this->crawler->filter('script');
 
         $lessons = [];
         $nodes->each(function (Crawler $node) use (&$lessons) {
@@ -47,11 +47,11 @@ class Parser
 
     public function lesson($nuxt)
     {
-        $parts = $nuxt['state']['watch']['parts'];
+        $parts = $nuxt['state']['parts']['parts'];
         $lessons = [];
         foreach ($parts as $i => $part) {
-            $id = $part['video']['id'];
-            $quality = $this->bestQuality($part);
+            $id = $part['video']['data']['id'];
+            $quality = 'hd';
             $slug = $words = preg_replace('/[0-9]+/', '', $part['slug']);
             $slug = ltrim($slug, '-');
             $lesson = (object) [
@@ -67,8 +67,4 @@ class Parser
         return $lessons;
     }
 
-    protected function bestQuality($part)
-    {
-        return $part['video']['download_qualities_enabled'][0]['value'];
-    }
 }
