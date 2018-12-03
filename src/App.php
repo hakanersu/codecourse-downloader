@@ -50,6 +50,10 @@ class App
             // And as a first page of courses lets get first page of courses.
             $courses = collect($remote->data)->pluck('slug')->toArray();
 
+            $info = collect($remote->data)->mapWithKeys(function ($item) {
+                return [$item->slug => ['id' => $item->id, 'title' => $item->title]];
+            });
+
             // Lets create symfony progress bar instance.
             $progressBar = new ProgressBar($output, $meta->total_pages);
 
@@ -80,10 +84,11 @@ class App
         $files = new FileLister();
 
         foreach ($courses as $course) {
+            $courseTitle = isset($info[$course], $info[$course]['id']) ? "{$info[$course]['id']}-{$info[$course]['title']}" : $course;
             // Lets check is there any directory with course slug.
-            if (! $files->exists($course)) {
+            if (! $files->exists($courseTitle)) {
                 // otherwise create directory
-                $files->file->createDir($course);
+                $files->file->createDir($courseTitle);
             }
 
             // Get single course and get lessons from it.
@@ -98,13 +103,13 @@ class App
 
             foreach ($lessons as $lesson) {
                 // Filename with full path.
-                $sink = getenv('DOWNLOAD_FOLDER') . "/{$course}/{$lesson->filename}";
+                $sink = getenv('DOWNLOAD_FOLDER') . "/{$courseTitle}/{$lesson->filename}";
 
                 // if we have file we will skip.
                 // Maybe i can check file size in future versions.
-                if (! $files->exists("{$course}/{$lesson->slug}")) {
+                if (! $files->exists("{$courseTitle}/{$lesson->slug}")) {
                     if (! file_exists($sink)) {
-                        $progressBar->setMessage("Downloading ({$course}): {$lesson->title}", 'status');
+                        $progressBar->setMessage("Downloading ({$courseTitle}): {$lesson->title}", 'status');
                         $progressBar->advance();
 
                         try {
@@ -112,11 +117,11 @@ class App
 
                             $this->remote->web->request('GET', $url, [
                                 'sink' => $sink,
-                                'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $course, $lesson) {
+                                'progress' => function ($dl_total_size, $dl_size_so_far, $ul_total_size, $ul_size_so_far) use ($progressBar, $courseTitle, $lesson) {
                                     $total = \ByteUnits\bytes($dl_total_size)->format('MB');
                                     $sofar = \ByteUnits\bytes($dl_size_so_far)->format('MB');
                                     $percentage = $dl_total_size != '0.00' ? number_format($dl_size_so_far * 100 / $dl_total_size) : 0;
-                                    $progressBar->setMessage("Downloading ({$course}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
+                                    $progressBar->setMessage("Downloading ({$courseTitle}): {$lesson->title} {$sofar}/{$total} ({$percentage}%)", 'status');
                                     // It takes too much time to figure this line. Without advance() it was not update message.
                                     // With  this method i can update message.
                                     $progressBar->display();
@@ -130,12 +135,12 @@ class App
                             exit;
                         }
                     } else {
-                        $progressBar->setMessage("Skipping, already downloaded ({$course}): {$lesson->title}", 'status');
+                        $progressBar->setMessage("Skipping, already downloaded ({$courseTitle}): {$lesson->title}", 'status');
                         $progressBar->advance();
                     }
                 }
             }
-            $progressBar->setMessage('All videos dowloaded for course: ' . $course, 'status');
+            $progressBar->setMessage('All videos dowloaded for course: ' . $courseTitle, 'status');
 
             $progressBar->finish();
         }

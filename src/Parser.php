@@ -54,7 +54,6 @@ class Parser
         $lessons = [];
         foreach ($parts as $i => $part) {
             $id = $part['video']['data']['id'];
-
             $slug = $words = preg_replace('/[0-9]+/', '', $part['slug']);
             $slug = ltrim($slug, '-');
             $lesson = (object) [
