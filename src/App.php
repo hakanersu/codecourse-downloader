@@ -37,19 +37,21 @@ class App
      */
     public function download($output, $courses = [])
     {
+        //dd($this->remote->meta()->meta->pagination);
         // if we have an empty series we will fetch all series
         if (empty($courses)) {
             $remote = $this->remote->meta();
 
             // Meta holds information about courses.
-            $meta = $remote->meta;
+            $meta = $remote->meta->pagination;
 
-            success("Total {$meta->total} lessons found, fetching  {$meta->last_page} pages for courses.");
+            success("Total {$meta->total} lessons found, fetching  {$meta->total_pages} pages for courses.");
+
             // And as a first page of courses lets get first page of courses.
             $courses = collect($remote->data)->pluck('slug')->toArray();
 
             // Lets create symfony progress bar instance.
-            $progressBar = new ProgressBar($output, $meta->last_page);
+            $progressBar = new ProgressBar($output, $meta->total_pages);
 
             // We can customize progress bar with custom messages.
             $progressBar->setFormat("%status%\n%current%/%max%  [%bar%] %percent:3s%%\n");
@@ -58,7 +60,7 @@ class App
             $progressBar->setMessage('Gathering data...', 'status');
 
             // Lets get the rest of the courses.
-            for ($i = 2; $i <= $meta->last_page; ++$i) {
+            for ($i = 2; $i <= $meta->total_pages; ++$i) {
                 $progressBar->advance();
                 $progressBar->setMessage("Fetching page: {$i}", 'status');
                 // Getting pages from codecourse api.

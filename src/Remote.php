@@ -35,8 +35,8 @@ class Remote
     public function __construct($username, $password, $io)
     {
         $this->cookie = new CookieJar();
-        $this->web = new Client(['verify' => false,'base_uri' => getenv('BASE_URL')]);
-        $this->api = new Client(['verify' => false,'base_uri' => getenv('API')]);
+        $this->web = new Client(['verify' => false, 'base_uri' => getenv('BASE_URL')]);
+        $this->api = new Client(['verify' => false, 'base_uri' => getenv('API')]);
         $this->parser = new Parser();
 
         $this->login($username, $password);

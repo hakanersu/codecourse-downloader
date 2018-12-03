@@ -27,18 +27,21 @@ class Parser
 
     public function getPage()
     {
-        $nodes = $this->crawler->filter('script[type="text/javascript"]');
+        $nodes = $this->crawler->filter('script');
 
         $lessons = [];
         $nodes->each(function (Crawler $node) use (&$lessons) {
             $text = trim($node->text());
             $find = 'window.__NUXT__=';
+
             if (strpos($text, $find) !== 0) {
                 return;
             }
+
             $end = strlen($text) - strlen($find) - 1;
             $nuxt_str = substr($text, strlen($find), $end);
             $nuxt = json_decode($nuxt_str, true);
+
             $lessons = $this->lesson($nuxt);
         });
 
@@ -47,15 +50,15 @@ class Parser
 
     public function lesson($nuxt)
     {
-        $parts = $nuxt['state']['watch']['parts'];
+        $parts = $nuxt['state']['parts']['parts'];
         $lessons = [];
         foreach ($parts as $i => $part) {
-            $id = $part['video']['id'];
-            $quality = $this->bestQuality($part);
+            $id = $part['video']['data']['id'];
+
             $slug = $words = preg_replace('/[0-9]+/', '', $part['slug']);
             $slug = ltrim($slug, '-');
             $lesson = (object) [
-                'link' => getenv('API') . '/api/videos/' . $id . '/download?quality=' . $quality,
+                'link' => getenv('API') . '/api/videos/' . $id . '/download?quality=hd',
                 'title' => $part['title'],
                 'slug' => $slug,
                 'filename' => sprintf('%02d', $i) . '-' . $slug . '.mp4',
@@ -65,10 +68,5 @@ class Parser
         }
 
         return $lessons;
-    }
-
-    protected function bestQuality($part)
-    {
-        return $part['video']['download_qualities_enabled'][0]['value'];
     }
 }
