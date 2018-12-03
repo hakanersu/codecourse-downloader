@@ -69,8 +69,14 @@ class App
                 $progressBar->setMessage("Fetching page: {$i}", 'status');
                 // Getting pages from codecourse api.
                 $slugs = $this->remote->page($i);
+
                 // And lets merge all lessons to single array.
-                $courses = array_merge($courses, $slugs);
+                $courses = array_merge($courses, $slugs->pluck('slug')->toArray());
+
+                $pageData = collect($slugs)->mapWithKeys(function ($item) {
+                    return [$item->slug => ['id' => $item->id, 'title' => $item->title]];
+                });
+                $info = $info->merge($pageData);
             }
 
             $progressBar->setMessage('Fetching pages completed.', 'status');

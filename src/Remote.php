@@ -113,7 +113,7 @@ class Remote
             $courses = json_decode($courses->getBody());
             $links = collect($courses->data);
 
-            return $links->pluck('slug')->toArray();
+            return $links;
         } catch (GuzzleException $e) {
             error("Can't fetch course page.");
             exit;
