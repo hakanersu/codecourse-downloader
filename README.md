@@ -1,5 +1,11 @@
 # Codecourse Downloader
 
+
+### Important
+```
+With last update i changed folder structure. With new folder structure courses will listed like "[course-id]-[course-title]".
+```
+
 Download codecourse.com videos.
 
 ```
