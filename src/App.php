@@ -134,11 +134,11 @@ class App
                                 },
                             ]);
                         } catch (\Exception $e) {
-                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
-                            exit;
+                            //error("Cant download '{$lesson->title}'. Do you have active subscription?");
+                            continue;
                         } catch (GuzzleException $e) {
-                            error("Cant download '{$lesson->title}'. Do you have active subscription?");
-                            exit;
+                            continue;
+                            //error("Cant download '{$lesson->title}'. Do you have active subscription?");
                         }
                     } else {
                         $progressBar->setMessage("Skipping, already downloaded ({$courseTitle}): {$lesson->title}", 'status');
