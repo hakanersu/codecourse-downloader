@@ -35,14 +35,31 @@ class Parser
             $find = 'window.__NUXT__=';
 
             if (strpos($text, $find) !== 0) {
+                //throw new \Exception("Can't parse lesson page, page structure changed.");
                 return;
             }
+            $re = '/parts:({parts:(\[(.*)\])}?),paths/m';
+            preg_match($re, $text, $matches, PREG_OFFSET_CAPTURE, 3);
+            $parts = $matches[3][0];
 
-            $end = strlen($text) - strlen($find) - 1;
-            $nuxt_str = substr($text, strlen($find), $end);
-            $nuxt = json_decode($nuxt_str, true);
+            $re = '/id:(.*?),title:"(.*?)",slug:(.*?),(.*?)order:(.*?),(.*?)video:{data:{id:(.*?),/m';
+            preg_match_all($re, $parts, $matches, PREG_SET_ORDER, 0);
+            $info = [];
+            $i = 1;
+            foreach ($matches as $match) {
+                if (strlen($match[3]) <=3) {
+                    $match[3] = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $match[2])));
+                }
+                array_push($info, [
+                    'order' => is_string($match[5]) ? $i : $match[5] ,
+                    'title' => $match[2],
+                    'slug' => str_replace('"', '', $match[3]),
+                    'video' => $match[7]
+                ]);
+                $i ++;
+            }
 
-            $lessons = $this->lesson($nuxt);
+            $lessons = $this->lesson($info);
         });
 
         return $lessons;
@@ -50,22 +67,16 @@ class Parser
 
     public function lesson($nuxt)
     {
-        $parts = $nuxt['state']['parts']['parts'];
         $lessons = [];
-        foreach ($parts as $i => $part) {
-            $id = $part['video']['data']['id'];
-            $slug = $words = preg_replace('/[0-9]+/', '', $part['slug']);
-            $slug = ltrim($slug, '-');
+        foreach ($nuxt as $part) {
             $lesson = (object) [
-                'link' => getenv('API') . '/api/videos/' . $id . '/download?quality=hd',
+                'link' => getenv('API') . '/api/videos/' . $part['video'] . '/download?quality=hd',
                 'title' => $part['title'],
-                'slug' => $slug,
-                'filename' => sprintf('%02d', $i) . '-' . $slug . '.mp4',
+                'slug' => $part['slug'],
+                'filename' => sprintf('%02d', (int)$part['order']-1) . '-' . $part['slug'] . '.mp4',
             ];
-
             $lessons[] = $lesson;
         }
-
         return $lessons;
     }
 }
