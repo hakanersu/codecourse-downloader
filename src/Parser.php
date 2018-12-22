@@ -40,9 +40,10 @@ class Parser
                 //throw new \Exception("Can't parse lesson page, page structure changed.");
                 return;
             }
-            $re = '/parts:({parts:(\[(.*)\])}?),paths/m';
+			
+			$re = '/parts:{parts:([\s\S]*),paths/m';
             preg_match($re, $text, $matches, PREG_OFFSET_CAPTURE, 3);
-            $parts = $matches[3][0];
+            $parts = $matches[0][0];
 
             $re = '/id:(.*?),title:"(.*?)",slug:(.*?),(.*?)order:(.*?),(.*?)video:{data:{id:(.*?),/m';
             preg_match_all($re, $parts, $matches, PREG_SET_ORDER, 0);
@@ -118,6 +119,7 @@ class Parser
             ];
             $lessons[] = $lesson;
         }
+		
         return $lessons;
     }
 }
