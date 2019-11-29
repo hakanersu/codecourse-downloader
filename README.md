@@ -2,16 +2,12 @@
 
 Download codecourse.com videos.
 
-Note: There is an offical download tool exists now: https://github.com/codecourse/cli
-
-```
-Please update your .env file if you updated from an old version.
-```
-
 ## Description
 Inspired from iamfreee/laracasts-downloader. Download or update your local catalogue with codecourse.com series.
 
 If you dont want to save your username and password in configuration file just remove username and password settings from configuration file. It will ask your username and password after you run downloader.
+
+Note: There is an offical download tool exists now: https://github.com/codecourse/cli
 
 #### An account with an active subscription is necessary!
 
