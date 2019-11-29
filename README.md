@@ -1,13 +1,8 @@
 # Codecourse Downloader
 
-
-### Important
-
-With last update i changed folder structure. With new folder structure courses will listed like "[course-id]-[course-title]".
-
----
-
 Download codecourse.com videos.
+
+Note: There is an offical download tool exists now: https://github.com/codecourse/cli
 
 ```
 Please update your .env file if you updated from an old version.
