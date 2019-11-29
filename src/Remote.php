@@ -92,12 +92,13 @@ class Remote
     public function getCourse($slug)
     {
         try {
-            $response = $this->web->request('GET', "watch/{$slug}", [
+            $response = $this->web->request('GET', "/api/courses/{$slug}/parts?page=1&perPage=1000", [
                 'cookies' => $this->cookie,
             ]);
+            
             $html = $response->getBody()->getContents();
-
-            return (new Parser())->parse($html);
+ 
+            return (new Parser())->parse(json_decode($html));
         } catch (GuzzleException $e) {
             error("Can't fetch course url");
         }
